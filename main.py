@@ -5,6 +5,8 @@ from rgbmatrix import RGBMatrix, RGBMatrixOptions
 from utils import args, led_matrix_options
 from data.data import Data
 import debug
+from api.main import ScoreboardApi
+import threading
 
 SCRIPT_NAME = "NHL Scoreboard"
 SCRIPT_VERSION = "0.1.0"
@@ -26,5 +28,11 @@ config = ScoreboardConfig("config", args)
 debug.set_debug_status(config)
 
 data = Data(config)
+
+api = ScoreboardApi(data)
+#api.run()
+apiThread = threading.Thread(target=api.run, args=())
+apiThread.daemon = True
+apiThread.start()
 
 MainRenderer(matrix, data).render()

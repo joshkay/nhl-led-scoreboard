@@ -57,3 +57,9 @@ class Data:
 
     def check_fav_team_next_game(self):
         pass
+
+    def set_fav_team_id(self, fav_team_id):
+        self.fav_team_id = fav_team_id
+     
+    def get_fav_team_id(self):
+        return self.fav_team_id
