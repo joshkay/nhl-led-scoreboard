@@ -14,7 +14,7 @@ git fetch origin --prune
 git pull
 sudo apt-get install libxml2-dev libxslt-dev
 sudo pip install pytz tzlocal requests
-sudo pip install flask flask_restful
+sudo pip install flask flask_restful python-dotenv gevent
 make
 echo "If you didn't see any errors above, everything should be installed!"
 echo "Installation complete! Play around with the examples in matrix/bindings/python/samples to make sure your matrix is working."

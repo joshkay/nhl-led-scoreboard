@@ -7,9 +7,11 @@ import time
 import debug
 
 class MainRenderer:
-    def __init__(self, matrix, data):
+    def __init__(self, matrix, data, sleepEvent):
         self.matrix = matrix
         self.data = data
+        self.sleepEvent = sleepEvent
+
         self.screen_config = screenConfig("64x32_config")
         self.canvas = matrix.CreateFrameCanvas()
         self.width = 64
@@ -42,11 +44,11 @@ class MainRenderer:
         if self.data.fav_team_game_today == 1:
             debug.info('Scheduled State')
             self._draw_pregame()
-            time.sleep(1800)
+            self.sleepEvent.wait(1800)
         elif self.data.fav_team_game_today == 2:
             debug.info('Pre-Game State')
             self._draw_pregame()
-            time.sleep(60)
+            self.sleepEvent.wait(60)
         elif (self.data.fav_team_game_today == 3) or (self.data.fav_team_game_today == 4):
             debug.info('Live State')
             # Draw the current game
@@ -55,14 +57,14 @@ class MainRenderer:
             debug.info('Final State')
             self._draw_post_game()
             #sleep an hour
-            time.sleep(3600)
+            self.sleepEvent.wait(3600)
         debug.info('ping render_game')
 
     def __render_off_day(self):
 
         debug.info('ping_day_off')
         self._draw_off_day()
-        time.sleep(21600) #sleep 6 hours
+        self.sleepEvent.wait(21600) #sleep 6 hours
 
     def _draw_pregame(self):
 
@@ -106,7 +108,7 @@ class MainRenderer:
             #(Need to make the screen run on it's own) If connection to the API fails, show bottom red line and refresh in 1 min.
             self.draw.line((0, 0) + (self.width, 0), fill=128)
             self.canvas = self.matrix.SwapOnVSync(self.canvas)
-            time.sleep(60)  # sleep for 1 min
+            self.sleepEvent.wait(60)  # sleep for 1 min
             # Refresh canvas
             self.image = Image.new('RGB', (self.width, self.height))
             self.draw = ImageDraw.Draw(self.image)
@@ -138,7 +140,7 @@ class MainRenderer:
 
                 # Use this code if you want the goal animation to run for both team's goal.
                 # Run the goal animation if there is a goal.
-                if overview['home_score'] > home_score or overview['away_score'] > away_score:
+                if self.data.home_team_goal or self.data.away_team_goal:
                    self._draw_goal()
 
                 # Prepare the data
@@ -178,23 +180,18 @@ class MainRenderer:
                 self.image = Image.new('RGB', (self.width, self.height))
                 self.draw = ImageDraw.Draw(self.image)
 
-
                 # Check if the game is over
                 if overview['game_status'] == 6 or overview['game_status'] == 7:
                     debug.info('GAME OVER')
                     break
 
-                # Save the scores.
-                away_score = overview['away_score']
-                home_score = overview['home_score']
-
                 self.data.needs_refresh = True
-                time.sleep(60)
+                self.sleepEvent.wait(15)
             else:
                 # (Need to make the screen run on it's own) If connection to the API fails, show bottom red line and refresh in 1 min.
                 self.draw.line((0, 0) + (self.width, 0), fill=128)
                 self.canvas = self.matrix.SwapOnVSync(self.canvas)
-                time.sleep(60)  # sleep for 1 min
+                self.sleepEvent.wait(60)  # sleep for 1 min
 
     def _draw_post_game(self):
         self.data.refresh_overview()
@@ -248,7 +245,7 @@ class MainRenderer:
             # (Need to make the screen run on it's own) If connection to the API fails, show bottom red line and refresh in 1 min.
             self.draw.line((0, 0) + (self.width, 0), fill=128)
             self.canvas = self.matrix.SwapOnVSync(self.canvas)
-            time.sleep(60)  # sleep for 1 min
+            self.sleepEvent.wait(60)  # sleep for 1 min
 
     def _draw_goal(self):
 
@@ -273,7 +270,7 @@ class MainRenderer:
             self.canvas.SetImage(im.convert('RGB'), 0, 0)
             self.canvas = self.matrix.SwapOnVSync(self.canvas)
             frameNo += 1
-            time.sleep(0.1)
+            self.sleepEvent.wait(0.1)
 
     def _draw_off_day(self):
         self.draw.text((0, -1), 'NO GAME TODAY', font=self.font_mini)
