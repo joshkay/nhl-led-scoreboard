@@ -21,7 +21,7 @@ class MainRenderer:
         self._dimmer = dimmer
 
         # Create a new data image.
-        self.image = Image.new('RGB', (self.width, self.height))
+        self.image = Image.new('RGBA', (self.width, self.height))
         self.draw = ImageDraw.Draw(self.image)
 
         # Load the fonts
@@ -284,7 +284,15 @@ class MainRenderer:
         away_score = overview['away_score']
         score = '{}-{}'.format(overview['away_score'], overview['home_score'])
 
+        # Open Fav Team Logo
+        if self.data.fav_team_id == overview['home_team_id']:
+                fav_team_logo = Image.open('logos/{}.png'.format(self.data.get_teams_info[overview['home_team_id']]['abbreviation']))
+        else:
+                fav_team_logo = Image.open('logos/{}.png'.format(self.data.get_teams_info[overview['away_team_id']]['abbreviation']))
+
         self.matrix.brightness = self._dimmer.brightness
+
+        self.image.paste(fav_team_logo, (32, 0), fav_team_logo)
 
         # Set Text
         self.draw.text((1, -1), 'No Game', font=self.font_mini,  align="center")
@@ -313,17 +321,10 @@ class MainRenderer:
                 wlfill = (255, 0, 0)
         # Set Win/Loss
         self.draw.multiline_text((1, 15), winloss, fill=wlfill, font=self.font, align="center")
-        # Open Fav Team Logo
-        if self.data.fav_team_id == overview['home_team_id']:
-                fav_team_logo = Image.open('logos/{}.png'.format(self.data.get_teams_info[overview['home_team_id']]['abbreviation']))
-        else:
-                fav_team_logo = Image.open('logos/{}.png'.format(self.data.get_teams_info[overview['away_team_id']]['abbreviation']))
-
-        # Draw data, then draw logo
-        self.canvas.SetImage(self.image, 0, 0)
-        self.canvas.SetImage(fav_team_logo.convert("RGB"), 30, 0)
+        
+        self.canvas.SetImage(self.image.convert('RGB'), 0, 0)
  
         # Refresh canvas
         self.canvas = self.matrix.SwapOnVSync(self.canvas)
-        self.image = Image.new('RGB', (self.width, self.height))
+        self.image = Image.new('RGBA', (self.width, self.height))
         self.draw = ImageDraw.Draw(self.image)
