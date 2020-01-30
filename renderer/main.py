@@ -7,13 +7,18 @@ import time
 import debug
 
 class MainRenderer:
-    def __init__(self, matrix, data):
+    def __init__(self, matrix, data, dimmer, sleepEvent):
         self.matrix = matrix
         self.data = data
+        self.sleepEvent = sleepEvent
+
         self.screen_config = screenConfig("64x32_config")
         self.canvas = matrix.CreateFrameCanvas()
         self.width = 64
         self.height = 32
+
+        self.matrix.brightness = 60
+        self._dimmer = dimmer
 
         # Create a new data image.
         self.image = Image.new('RGB', (self.width, self.height))
@@ -42,11 +47,11 @@ class MainRenderer:
         if self.data.fav_team_game_today == 1:
             debug.info('Scheduled State')
             self._draw_pregame()
-            time.sleep(1800)
+            self.sleepEvent.wait(1800)
         elif self.data.fav_team_game_today == 2:
             debug.info('Pre-Game State')
             self._draw_pregame()
-            time.sleep(60)
+            self.sleepEvent.wait(60)
         elif (self.data.fav_team_game_today == 3) or (self.data.fav_team_game_today == 4):
             debug.info('Live State')
             # Draw the current game
@@ -55,14 +60,14 @@ class MainRenderer:
             debug.info('Final State')
             self._draw_post_game()
             #sleep an hour
-            time.sleep(3600)
+            self.sleepEvent.wait(3600)
         debug.info('ping render_game')
 
     def __render_off_day(self):
 
         debug.info('ping_day_off')
         self._draw_off_day()
-        time.sleep(21600) #sleep 6 hours
+        self.sleepEvent.wait(21600) #sleep 6 hours
 
     def _draw_pregame(self):
 
@@ -106,7 +111,7 @@ class MainRenderer:
             #(Need to make the screen run on it's own) If connection to the API fails, show bottom red line and refresh in 1 min.
             self.draw.line((0, 0) + (self.width, 0), fill=128)
             self.canvas = self.matrix.SwapOnVSync(self.canvas)
-            time.sleep(60)  # sleep for 1 min
+            self.sleepEvent.wait(60)  # sleep for 1 min
             # Refresh canvas
             self.image = Image.new('RGB', (self.width, self.height))
             self.draw = ImageDraw.Draw(self.image)
@@ -138,7 +143,7 @@ class MainRenderer:
 
                 # Use this code if you want the goal animation to run for both team's goal.
                 # Run the goal animation if there is a goal.
-                if overview['home_score'] > home_score or overview['away_score'] > away_score:
+                if self.data.home_team_goal or self.data.away_team_goal:
                    self._draw_goal()
 
                 # Prepare the data
@@ -178,23 +183,18 @@ class MainRenderer:
                 self.image = Image.new('RGB', (self.width, self.height))
                 self.draw = ImageDraw.Draw(self.image)
 
-
                 # Check if the game is over
                 if overview['game_status'] == 6 or overview['game_status'] == 7:
                     debug.info('GAME OVER')
                     break
 
-                # Save the scores.
-                away_score = overview['away_score']
-                home_score = overview['home_score']
-
                 self.data.needs_refresh = True
-                time.sleep(60)
+                self.sleepEvent.wait(15)
             else:
                 # (Need to make the screen run on it's own) If connection to the API fails, show bottom red line and refresh in 1 min.
                 self.draw.line((0, 0) + (self.width, 0), fill=128)
                 self.canvas = self.matrix.SwapOnVSync(self.canvas)
-                time.sleep(60)  # sleep for 1 min
+                self.sleepEvent.wait(60)  # sleep for 1 min
 
     def _draw_post_game(self):
         self.data.refresh_overview()
@@ -248,7 +248,7 @@ class MainRenderer:
             # (Need to make the screen run on it's own) If connection to the API fails, show bottom red line and refresh in 1 min.
             self.draw.line((0, 0) + (self.width, 0), fill=128)
             self.canvas = self.matrix.SwapOnVSync(self.canvas)
-            time.sleep(60)  # sleep for 1 min
+            self.sleepEvent.wait(60)  # sleep for 1 min
 
     def _draw_goal(self):
 
@@ -273,9 +273,57 @@ class MainRenderer:
             self.canvas.SetImage(im.convert('RGB'), 0, 0)
             self.canvas = self.matrix.SwapOnVSync(self.canvas)
             frameNo += 1
-            time.sleep(0.1)
+            self.sleepEvent.wait(0.1)
 
     def _draw_off_day(self):
-        self.draw.text((0, -1), 'NO GAME TODAY', font=self.font_mini)
+        self.data.get_lastgame()
+        overview = self.data.lastgame
+        print("Debug data: Render")
+        print(overview)
+        home_score = overview['home_score']
+        away_score = overview['away_score']
+        score = '{}-{}'.format(overview['away_score'], overview['home_score'])
+
+        self.matrix.brightness = self._dimmer.brightness
+
+        # Set Text
+        self.draw.text((1, -1), 'No Game', font=self.font_mini,  align="center")
+        self.draw.text((1, 5), 'Today', font=self.font_mini,  align="center")
+
+        # Set Last Game Day
+        self.draw.text((8, 13), overview['game_date'], font=self.font_mini,  align="center")
+
+        # Set Last Score
+        self.draw.multiline_text((9, 19), score, fill=(255, 255, 255), font=self.font, align="center")
+
+        # Win/Loss?
+        if home_score > away_score:
+                if self.data.fav_team_id == overview['home_team_id']:
+                        winloss = "W"
+                else:
+                        winloss = "L"
+        else:
+                if self.data.fav_team_id == overview['home_team_id']:
+                        winloss = "L"
+                else:
+                        winloss = "W"
+        if winloss == "W":
+                wlfill = (0, 225, 0)
+        else:
+                wlfill = (255, 0, 0)
+        # Set Win/Loss
+        self.draw.multiline_text((1, 15), winloss, fill=wlfill, font=self.font, align="center")
+        # Open Fav Team Logo
+        if self.data.fav_team_id == overview['home_team_id']:
+                fav_team_logo = Image.open('logos/{}.png'.format(self.data.get_teams_info[overview['home_team_id']]['abbreviation']))
+        else:
+                fav_team_logo = Image.open('logos/{}.png'.format(self.data.get_teams_info[overview['away_team_id']]['abbreviation']))
+
+        # Draw data, then draw logo
         self.canvas.SetImage(self.image, 0, 0)
+        self.canvas.SetImage(fav_team_logo.convert("RGB"), 30, 0)
+ 
+        # Refresh canvas
         self.canvas = self.matrix.SwapOnVSync(self.canvas)
+        self.image = Image.new('RGB', (self.width, self.height))
+        self.draw = ImageDraw.Draw(self.image)
