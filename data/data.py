@@ -93,3 +93,6 @@ class Data:
 
     def get_current_team_id(self):
         return self.current_team_id
+    
+    def get_lastgame(self):
+        self.lastgame = nhlparser.fetch_fav_team_lastgame(self.fav_team_id)

@@ -194,3 +194,28 @@ def check_if_game(team_id):
         # Return True to allow for another pass for test
         print("Error encountered, Can't reach the NHL API")
         return False
+
+def fetch_fav_team_lastgame(team_id):
+    """ Function to get the summary of the last game played. """
+    # Set URL depending on team selected
+    url = '{0}teams/{1}?expand=team.schedule.previous'.format(NHL_API_URL, team_id)
+    try:
+        game_data = requests.get(url)
+        game_data = game_data.json()
+        home_team_id = int(game_data['teams'][0]['previousGameSchedule']['dates'][0]['games'][0]['teams']['home']['team']['id'])
+        away_team_id = int(game_data['teams'][0]['previousGameSchedule']['dates'][0]['games'][0]['teams']['away']['team']['id'])
+        game_status = int(game_data['teams'][0]['previousGameSchedule']['dates'][0]['games'][0]['status']['statusCode'])
+        home_score = int(game_data['teams'][0]['previousGameSchedule']['dates'][0]['games'][0]['teams']['home']['score'])
+        away_score = int(game_data['teams'][0]['previousGameSchedule']['dates'][0]['games'][0]['teams']['away']['score'])
+        game_date = convert_time(game_data['teams'][0]['previousGameSchedule']["dates"][0]["games"][0]["gameDate"]).strftime("%b %d")
+
+        last_game = {'home_team_id': home_team_id, 'home_score': home_score,
+                                 'away_team_id': away_team_id, 'away_score': away_score, 'game_status': game_status,
+                                 'game_date': game_date}
+        return last_game
+    except requests.exceptions.RequestException:
+        print("Error encountered, Can't reach the NHL API")
+        return 0
+    except KeyError:
+        print("missing data from the game. Game has not begun or is not scheduled today.")
+

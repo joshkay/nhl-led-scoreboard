@@ -8,9 +8,21 @@ import debug
 from api.main import ScoreboardApi
 import threading
 import sys
+from dimmer import Dimmer
+from apscheduler.schedulers.background import BackgroundScheduler
+
+#For remote debugging only
+#import ptvsd
+
+# Allow other computers to attach to ptvsd at this IP address and port.
+#ptvsd.enable_attach(address=('0.0.0.0', 3000), redirect_output=True)
+
+# Pause the program until a remote debugger is attached
+#ptvsd.wait_for_attach()
+
 
 SCRIPT_NAME = "NHL Scoreboard"
-SCRIPT_VERSION = "0.1.0"
+SCRIPT_VERSION = "0.1.4"
 
 def run():
   # Get supplied command line arguments
@@ -35,14 +47,21 @@ def run():
   # Allows API to cancel the sleep
   sleepEvent = threading.Event()
 
+  # Dimmer routine to automatically dim display
+  scheduler = BackgroundScheduler()
+  dimmer = Dimmer(scheduler, sleepEvent)
+
+  scheduler.start()
+  
   # Initialize API and run on separate thread
-  api = ScoreboardApi(data, sleepEvent)
+  api = ScoreboardApi(data, dimmer, sleepEvent)
   
   apiThread = threading.Thread(target=api.run, args=())
   apiThread.daemon = True
   apiThread.start()
 
-  MainRenderer(matrix, data, sleepEvent).render()
+
+  MainRenderer(matrix, data, dimmer, sleepEvent).render()
 
 try:
   run()

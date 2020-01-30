@@ -20,19 +20,42 @@ class Team(Resource):
     self.sleepEvent.clear()
     return { 'current_team_id': self.data.get_current_team_id() }
 
+class Brightness(Resource):
+  def __init__(self, **kwargs):
+    self.dimmer = kwargs['dimmer']
+    self.sleepEvent = kwargs['sleepEvent']
+
+  def get(self):
+    return { 'current_brightness': self.dimmer.brightness }
+
+  def put(self, brightness):
+    if brightness < 0:
+      brightness = 0
+    if brightness > 100:
+      brightness = 100
+
+    self.dimmer.brightness = brightness
+    self.sleepEvent.set()
+    self.sleepEvent.clear()
+    return { 'current_brightness': self.dimmer.brightness }
 
 class ScoreboardApi:
-  def __init__(self, data, sleepEvent):
+  def __init__(self, data, dimmer, sleepEvent):
     self.app = Flask(__name__)
 
     log = logging.getLogger('werkzeug')
-    log.disabled = True
-    self.app.logger.disabled = True
+    log.disabled = False
+    self.app.logger.disabled = False
 
     self.api = Api(self.app)
     
     self.api.add_resource(Team, '/team', '/team/<int:id>', resource_class_kwargs={
       'data': data,
+      'sleepEvent': sleepEvent
+    })
+
+    self.api.add_resource(Brightness, '/brightness', '/brightness/<int:brightness>', resource_class_kwargs={
+      'dimmer': dimmer,
       'sleepEvent': sleepEvent
     })
 

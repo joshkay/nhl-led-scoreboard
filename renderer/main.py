@@ -7,7 +7,7 @@ import time
 import debug
 
 class MainRenderer:
-    def __init__(self, matrix, data, sleepEvent):
+    def __init__(self, matrix, data, dimmer, sleepEvent):
         self.matrix = matrix
         self.data = data
         self.sleepEvent = sleepEvent
@@ -16,6 +16,9 @@ class MainRenderer:
         self.canvas = matrix.CreateFrameCanvas()
         self.width = 64
         self.height = 32
+
+        self.matrix.brightness = 60
+        self._dimmer = dimmer
 
         # Create a new data image.
         self.image = Image.new('RGB', (self.width, self.height))
@@ -273,6 +276,54 @@ class MainRenderer:
             self.sleepEvent.wait(0.1)
 
     def _draw_off_day(self):
-        self.draw.text((0, -1), 'NO GAME TODAY', font=self.font_mini)
+        self.data.get_lastgame()
+        overview = self.data.lastgame
+        print("Debug data: Render")
+        print(overview)
+        home_score = overview['home_score']
+        away_score = overview['away_score']
+        score = '{}-{}'.format(overview['away_score'], overview['home_score'])
+
+        self.matrix.brightness = self._dimmer.brightness
+
+        # Set Text
+        self.draw.text((1, -1), 'No Game', font=self.font_mini,  align="center")
+        self.draw.text((1, 5), 'Today', font=self.font_mini,  align="center")
+
+        # Set Last Game Day
+        self.draw.text((8, 13), overview['game_date'], font=self.font_mini,  align="center")
+
+        # Set Last Score
+        self.draw.multiline_text((9, 19), score, fill=(255, 255, 255), font=self.font, align="center")
+
+        # Win/Loss?
+        if home_score > away_score:
+                if self.data.fav_team_id == overview['home_team_id']:
+                        winloss = "W"
+                else:
+                        winloss = "L"
+        else:
+                if self.data.fav_team_id == overview['home_team_id']:
+                        winloss = "L"
+                else:
+                        winloss = "W"
+        if winloss == "W":
+                wlfill = (0, 225, 0)
+        else:
+                wlfill = (255, 0, 0)
+        # Set Win/Loss
+        self.draw.multiline_text((1, 15), winloss, fill=wlfill, font=self.font, align="center")
+        # Open Fav Team Logo
+        if self.data.fav_team_id == overview['home_team_id']:
+                fav_team_logo = Image.open('logos/{}.png'.format(self.data.get_teams_info[overview['home_team_id']]['abbreviation']))
+        else:
+                fav_team_logo = Image.open('logos/{}.png'.format(self.data.get_teams_info[overview['away_team_id']]['abbreviation']))
+
+        # Draw data, then draw logo
         self.canvas.SetImage(self.image, 0, 0)
+        self.canvas.SetImage(fav_team_logo.convert("RGB"), 30, 0)
+ 
+        # Refresh canvas
         self.canvas = self.matrix.SwapOnVSync(self.canvas)
+        self.image = Image.new('RGB', (self.width, self.height))
+        self.draw = ImageDraw.Draw(self.image)
