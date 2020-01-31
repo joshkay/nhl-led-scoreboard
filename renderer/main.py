@@ -101,7 +101,7 @@ class MainRenderer:
             self.draw.text((25, 13), 'VS', font=self.font)
 
             # Put the data on the canvas
-            self.canvas.SetImage(self.image, 0, 0)
+            self.canvas.SetImage(self.image.convert('RGB'), 0, 0)
 
             # Put the images on the canvas
             self.canvas.SetImage(away_team_logo.convert("RGB"), away_team_logo_pos["x"], away_team_logo_pos["y"])
@@ -127,8 +127,12 @@ class MainRenderer:
         overview = self.data.overview
         home_score = overview['home_score']
         away_score = overview['away_score']
+        team = self.data.get_current_team_id()
 
         while True:
+
+            if team != self.data.get_current_team_id():
+              break
 
             # Refresh the data
             if self.data.needs_refresh:
@@ -176,7 +180,7 @@ class MainRenderer:
                 self.draw.multiline_text((time_period_pos, 5), time_period, fill=(255, 255, 255), font=self.font_mini, align="center")
 
                 # Put the data on the canvas
-                self.canvas.SetImage(self.image, 0, 0)
+                self.canvas.SetImage(self.image.convert('RGB'), 0, 0)
 
                 # Put the images on the canvas
                 self.canvas.SetImage(away_team_logo.convert("RGB"), away_team_logo_pos["x"], away_team_logo_pos["y"])
@@ -237,7 +241,7 @@ class MainRenderer:
             home_team_logo_pos = self.screen_config.team_logos_pos[str(overview['home_team_id'])]['home']
 
             # Put the data on the canvas
-            self.canvas.SetImage(self.image, 0, 0)
+            self.canvas.SetImage(self.image.convert('RGB'), 0, 0)
 
             # Put the images on the canvas
             self.canvas.SetImage(away_team_logo.convert("RGB"), away_team_logo_pos["x"], away_team_logo_pos["y"])
@@ -288,26 +292,26 @@ class MainRenderer:
         print(overview)
         home_score = overview['home_score']
         away_score = overview['away_score']
-        score = '{}-{}'.format(overview['away_score'], overview['home_score'])
+
+        if self.data.get_current_team_id() == overview['home_team_id']:
+          score = '{}-{}'.format(overview['home_score'], overview['away_score'])
+        else:
+          score = '{}-{}'.format(overview['away_score'], overview['home_score'])
 
         # Open Fav Team Logo
-        if self.data.fav_team_id == overview['home_team_id']:
-                fav_team_logo = Image.open('logos/{}.png'.format(self.data.get_teams_info[overview['home_team_id']]['abbreviation']))
-        else:
-                fav_team_logo = Image.open('logos/{}.png'.format(self.data.get_teams_info[overview['away_team_id']]['abbreviation']))
+        team_logo = Image.open('logos/{}.png'.format(self.data.get_teams_info[self.data.get_current_team_id()]['abbreviation']))
 
         self.matrix.brightness = self._dimmer.brightness
-
 
         # Set Text
         self.draw.text((1, -1), 'No Game Today', font=self.font_mini,  align="center")
         #self.draw.text((1, 5), 'Today', font=self.font_mini,  align="center")
 
         try:
-          self.image.paste(fav_team_logo, (32, 0), fav_team_logo)
+          self.image.paste(team_logo, (32, 0), team_logo)
         except:
-          self.image.paste(fav_team_logo, (32, 0))
-          
+          self.image.paste(team_logo, (32, 0))
+
         # Set Last Game Day
         self.draw.text((8, 13), overview['game_date'], font=self.font_mini,  align="center")
 
@@ -316,19 +320,21 @@ class MainRenderer:
 
         # Win/Loss?
         if home_score > away_score:
-                if self.data.fav_team_id == overview['home_team_id']:
-                        winloss = "W"
-                else:
-                        winloss = "L"
+          if self.data.get_current_team_id() == overview['home_team_id']:
+            winloss = "W"
+          else:
+            winloss = "L"
         else:
-                if self.data.fav_team_id == overview['home_team_id']:
-                        winloss = "L"
-                else:
-                        winloss = "W"
+          if self.data.get_current_team_id() == overview['home_team_id']:
+            winloss = "L"
+          else:
+            winloss = "W"
+
         if winloss == "W":
-                wlfill = (0, 225, 0)
+          wlfill = (0, 225, 0)
         else:
-                wlfill = (255, 0, 0)
+          wlfill = (255, 0, 0)
+
         # Set Win/Loss
         self.draw.multiline_text((1, 15), winloss, fill=wlfill, font=self.font, align="center")
         

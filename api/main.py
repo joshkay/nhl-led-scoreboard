@@ -1,10 +1,12 @@
-from flask import Flask, request
+from flask import Flask, request, send_from_directory
 from flask_restful import Resource, Api
+from flask_cors import CORS
 from json import dumps
 from ip import get_ip
 from gevent.pywsgi import WSGIServer
 import logging
 import debug
+import os
 
 class Team(Resource):
   def __init__(self, **kwargs):
@@ -41,7 +43,18 @@ class Brightness(Resource):
 
 class ScoreboardApi:
   def __init__(self, data, dimmer, sleepEvent):
-    self.app = Flask(__name__)
+    self.app = Flask(__name__, static_folder='../client/build')
+    CORS(self.app)
+
+    # Serve React App
+    self.app.route('/', defaults={'path': ''})
+    self.app.route('/<path:path>')
+
+    def serve(path):
+      if path != "" and os.path.exists(app.static_folder + '/' + path):
+          return send_from_directory(app.static_folder, path)
+      else:
+          return send_from_directory(app.static_folder, 'index.html')
 
     log = logging.getLogger('werkzeug')
     log.disabled = False
