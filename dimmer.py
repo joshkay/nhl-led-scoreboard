@@ -18,7 +18,7 @@ class Dimmer(object):
         self.update()
 
         # Run every 5 minutes
-        scheduler.add_job(self.update, 'cron', minute='*/5')
+        scheduler.add_job(self.update, 'cron', minute='*/10')
 
     def update(self):
         self._observer.date = ephem.now()

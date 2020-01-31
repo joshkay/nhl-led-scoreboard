@@ -1,6 +1,6 @@
 from PIL import Image, ImageFont, ImageDraw, ImageSequence
 import requests
-import urllib2
+#import urllib2
 from rgbmatrix import graphics
 from utils import center_text
 from calendar import month_abbr
@@ -304,8 +304,8 @@ class MainRenderer:
         self.matrix.brightness = self._dimmer.brightness
 
         # Set Text
-        self.draw.text((1, -1), 'No Game Today', font=self.font_mini,  align="center")
-        #self.draw.text((1, 5), 'Today', font=self.font_mini,  align="center")
+        self.draw.text((1, -1), 'No Game', font=self.font_mini,  align="center")
+        self.draw.text((1, 5), 'Today', font=self.font_mini,  align="center")
 
         try:
           self.image.paste(team_logo, (32, 0), team_logo)
@@ -348,7 +348,7 @@ class MainRenderer:
     def draw_face(self):
       #url = "https://nhl.bamcontent.com/images/headshots/current/168x168/8478403.jpg"
       #url = 'https://www-league.nhlstatic.com/images/logos/teams-current-primary-light/10.svg'
-      img = Image.open(requests.get(url, stream=True).raw).convert('RGBA')
+      #img = Image.open(requests.get(url, stream=True).raw).convert('RGBA')
       #img.thumbnail((64, 32))
 
       img = img.crop((img.size[0] * 0.35, img.size[1] * 0.3, img.size[0] - (img.size[0] * 0.4), img.size[0] - (img.size[0] * 0.4)))

@@ -131,6 +131,12 @@ struct RGBLedMatrixOptions {
    */
   const char *pixel_mapper_config;  /* Corresponding flag: --led-pixel-mapper */
 
+  /*
+   * Panel type. Typically just NULL, but certain panels (AM6126) require
+   * an initialization sequence
+   */
+  const char *panel_type;  /* Corresponding flag: --led-panel-type */
+
   /** The following are boolean flags, all off by default **/
 
   /* Allow to use the hardware subsystem to create pulses. This won't do
@@ -253,6 +259,8 @@ struct LedCanvas *led_matrix_create_offscreen_canvas(struct RGBLedMatrix *matrix
 struct LedCanvas *led_matrix_swap_on_vsync(struct RGBLedMatrix *matrix,
                                            struct LedCanvas *canvas);
 
+uint8_t led_matrix_get_brightness(struct RGBLedMatrix *matrix);
+void led_matrix_set_brightness(struct RGBLedMatrix *matrix, uint8_t brightness);
 
 struct LedFont *load_font(const char *bdf_font_file);
 void delete_font(struct LedFont *font);

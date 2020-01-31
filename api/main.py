@@ -2,7 +2,7 @@ from flask import Flask, request, send_from_directory
 from flask_restful import Resource, Api
 from flask_cors import CORS
 from json import dumps
-from ip import get_ip
+from api.ip import get_ip
 from gevent.pywsgi import WSGIServer
 import logging
 import debug
