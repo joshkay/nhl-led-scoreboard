@@ -304,8 +304,8 @@ class MainRenderer:
         self.matrix.brightness = self._dimmer.brightness
 
         # Set Text
-        self.draw.text((1, -1), 'No Game', font=self.font_mini,  align="center")
-        self.draw.text((1, 5), 'Today', font=self.font_mini,  align="center")
+        self.draw.text((1, -1), 'No Game Today', font=self.font_mini,  align="center")
+        #self.draw.text((1, 5), 'Today', font=self.font_mini,  align="center")
 
         try:
           self.image.paste(team_logo, (32, 0), team_logo)
