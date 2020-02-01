@@ -1,4 +1,4 @@
-from flask import Flask, request, send_from_directory
+from flask import Flask, request, send_from_directory, Blueprint
 from flask_restful import Resource, Api
 from flask_cors import CORS
 from json import dumps
@@ -17,6 +17,7 @@ class Team(Resource):
     return { 'current_team_id': self.data.get_current_team_id() }
 
   def put(self, id):
+    print(id)
     self.data.set_current_team_id(id)
     self.sleepEvent.set()
     self.sleepEvent.clear()
@@ -60,16 +61,21 @@ class ScoreboardApi:
     self.app.logger.disabled = False
 
     self.api = Api(self.app)
-    
-    self.api.add_resource(Team, '/api/team', '/api/team/<int:id>', resource_class_kwargs={
+
+    root_bp = Blueprint('api', __name__)
+    api_root_bp = Api(root_bp)
+
+    api_root_bp.add_resource(Team, '/team', '/team/<int:id>', resource_class_kwargs={
       'data': data,
       'sleepEvent': sleepEvent
     })
 
-    self.api.add_resource(Brightness, '/api/brightness', '/api/brightness/<int:brightness>', resource_class_kwargs={
+    api_root_bp.add_resource(Brightness, '/brightness', '/brightness/<int:brightness>', resource_class_kwargs={
       'dimmer': dimmer,
       'sleepEvent': sleepEvent
     })
+
+    self.app.register_blueprint(root_bp, url_prefix='/api')
 
   def run(self):
     debug.info('API running: {}'.format(get_ip()))
