@@ -30,6 +30,7 @@ def run():
 
   # Check for led configuration arguments
   matrixOptions = led_matrix_options(commandArgs)
+  matrixOptions.drop_privileges = False
 
   # Initialize the matrix
   matrix = RGBMatrix(options = matrixOptions)
@@ -59,7 +60,6 @@ def run():
   apiThread = threading.Thread(target=api.run, args=())
   apiThread.daemon = True
   apiThread.start()
-
 
   MainRenderer(matrix, data, dimmer, sleepEvent).render()
 
