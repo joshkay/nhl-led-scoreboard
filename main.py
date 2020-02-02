@@ -61,7 +61,8 @@ def run():
   apiThread.daemon = True
   apiThread.start()
 
-  MainRenderer(matrix, data, dimmer, sleepEvent).render()
+  #MainRenderer(matrix, data, dimmer, sleepEvent).render()
+  MainRenderer(matrix, data).render()
 
 try:
    run()

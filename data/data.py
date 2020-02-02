@@ -35,15 +35,6 @@ class Data:
         # get favorite team's id
         self.pref_teams = self.get_pref_teams_id()
 
-        # Used to set the current game displayed
-        self.current_team_id = self.fav_team_id
-
-        # Flag to display goal horn
-        self.home_team_goal = False
-        self.away_team_goal = False
-
-        self.overview = 0
-
         # Parse today's date and see if we should use today or yesterday
         self.refresh_current_date()
 
