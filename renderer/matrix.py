@@ -10,9 +10,7 @@ class Matrix:
     self.image = Image.new('RGBA', (self.get_width(), self.get_height()))
     self.draw = ImageDraw.Draw(self.image)
 
-    # Create a new data image.
-    self.image = Image.new('RGBA', (self.get_width(), self.get_height()))
-    self.draw = ImageDraw.Draw(self.image)
+    self.pixels = self.image.load()
     
     self.canvas = matrix.CreateFrameCanvas()
 
@@ -33,6 +31,10 @@ class Matrix:
       x += self.get_width() - image.size[0]
 
     self.image.paste(image, (x, y), image)
+
+  def set_pixel(self, position, color):
+    self.pixels = self.image.load()
+    self.pixels[position] = color
 
   def render(self):
     self.canvas.SetImage(self.image.convert('RGB'), 0, 0)

@@ -7,7 +7,6 @@ from data.scoreboard import Scoreboard
 class MainRenderer:
     def __init__(self, matrix, data):
         self.matrix = matrix
-        self.canvas = self.matrix.CreateFrameCanvas()
         self.data = data
         self.status = self.data.status
         self.boards = Boards()

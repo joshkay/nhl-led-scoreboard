@@ -10,7 +10,7 @@ from api.main import ScoreboardApi
 import threading
 import sys
 from dimmer import Dimmer
-from apscheduler.schedulers.background import BackgroundScheduler
+from renderer.matrix import Matrix
 
 #For remote debugging only
 #import ptvsd
@@ -33,29 +33,30 @@ def run():
   matrixOptions.drop_privileges = False
 
   # Initialize the matrix
-  matrix = RGBMatrix(options = matrixOptions)
+  matrix = Matrix(RGBMatrix(options = matrixOptions))
 
   # Print some basic info on startup
-  debug.info("{} - v{} ({}x{})".format(SCRIPT_NAME, SCRIPT_VERSION, matrix.width, matrix.height))
+  debug.info("{} - v{} ({}x{})".format(SCRIPT_NAME, SCRIPT_VERSION, matrix.get_width(), matrix.get_height()))
 
   # Read scoreboard options from config.json if it exists
-  config = ScoreboardConfig("config", commandArgs, matrix.width, matrix.height)
+  config = ScoreboardConfig("config", commandArgs, matrix.get_width(), matrix.get_height())
   debug.set_debug_status(config)
 
   data = Data(config)
 
   # Event used to sleep when rendering
   # Allows API to cancel the sleep
-  sleepEvent = threading.Event()
+  #sleepEvent = threading.Event()
 
   # Dimmer routine to automatically dim display
-  scheduler = BackgroundScheduler()
-  dimmer = Dimmer(scheduler, sleepEvent)
+  dimmer = Dimmer(matrix)
 
-  scheduler.start()
+  dimmerThread = threading.Thread(target=dimmer.run, args=())
+  dimmerThread.daemon = True
+  dimmerThread.start()
   
   # Initialize API and run on separate thread
-  api = ScoreboardApi(data, dimmer, sleepEvent)
+  api = ScoreboardApi(data, dimmer, matrix)
   
   apiThread = threading.Thread(target=api.run, args=())
   apiThread.daemon = True

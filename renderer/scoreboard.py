@@ -13,7 +13,7 @@ class ScoreboardRenderer:
         self.scoreboard = scoreboard
         self.index = index
 
-        self.matrix = Matrix(matrix)
+        self.matrix = matrix
 
         self.away_logo = LogoRenderer(self.scoreboard.away_team, self.matrix, "left")
         self.home_logo = LogoRenderer(self.scoreboard.home_team, self.matrix, "right")
@@ -37,8 +37,6 @@ class ScoreboardRenderer:
         if self.status.is_irregular(self.scoreboard.status):
             pass
 
-        # Load the canvas on screen.
-        self.matrix.render()
 
     def draw_scheduled(self):
         start_time = self.scoreboard.start_time

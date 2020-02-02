@@ -32,6 +32,7 @@ class LogoRenderer:
       url.format(logo_name, team.id)
     )
     self.logo.thumbnail((64, 32))
+    #self.logo = self.logo.transpose(method=Image.FLIP_LEFT_RIGHT)
     self.logo.save(filename)
 
   def render(self):

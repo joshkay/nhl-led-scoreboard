@@ -11,7 +11,7 @@ import os
 class Team(Resource):
   def __init__(self, **kwargs):
     self.data = kwargs['data']
-    self.sleepEvent = kwargs['sleepEvent']
+    self.matrix = kwargs['matrix']
 
   def get(self):
     return { 'current_team_id': self.data.get_current_team_id() }
@@ -19,14 +19,13 @@ class Team(Resource):
   def put(self, id):
     print(id)
     self.data.set_current_team_id(id)
-    self.sleepEvent.set()
-    self.sleepEvent.clear()
+    self.matrix.render()
     return { 'current_team_id': self.data.get_current_team_id() }
 
 class Brightness(Resource):
   def __init__(self, **kwargs):
     self.dimmer = kwargs['dimmer']
-    self.sleepEvent = kwargs['sleepEvent']
+    self.matrix = kwargs['matrix']
 
   def get(self):
     return { 'current_brightness': self.dimmer.brightness }
@@ -38,12 +37,12 @@ class Brightness(Resource):
       brightness = 100
 
     self.dimmer.brightness = brightness
-    self.sleepEvent.set()
-    self.sleepEvent.clear()
+    self.matrix.set_brightness(brightness)
+    self.matrix.render()
     return { 'current_brightness': self.dimmer.brightness }
 
 class ScoreboardApi:
-  def __init__(self, data, dimmer, sleepEvent):
+  def __init__(self, data, dimmer, matrix):
     self.app = Flask(__name__, static_folder='../client/build')
     CORS(self.app)
 
@@ -67,12 +66,12 @@ class ScoreboardApi:
 
     api_root_bp.add_resource(Team, '/team', '/team/<int:id>', resource_class_kwargs={
       'data': data,
-      'sleepEvent': sleepEvent
+      'matrix': matrix
     })
 
     api_root_bp.add_resource(Brightness, '/brightness', '/brightness/<int:brightness>', resource_class_kwargs={
       'dimmer': dimmer,
-      'sleepEvent': sleepEvent
+      'matrix': matrix
     })
 
     self.app.register_blueprint(root_bp, url_prefix='/api')

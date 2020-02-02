@@ -24,6 +24,10 @@ class Scoreticker:
                 print(Scoreboard(self.games[self.index], self.data.teams_info))
                 ScoreboardRenderer(self.data, self.matrix, Scoreboard(self.games[self.index], self.data.teams_info), self.index).render()
                 self.show_indicator()
+
+                # Load the canvas on screen.
+                self.matrix.render()
+                
                 if self.index < (len(self.games) - 1):
                     self.index += 1
                 else:
@@ -50,7 +54,7 @@ class Scoreticker:
 
         # Measure the width of the indicator and then center it on the screen
         indicator_length = (self.num_games * self.spacing) - (self.spacing - 1)
-        align = center_obj(self.matrix.width, indicator_length)
+        align = center_obj(self.matrix.get_width(), indicator_length)
 
         # Move back the indicator by 1 pixel if the number of games is even.
         if self.num_games%2 == 0 and self.many_games == False:
@@ -60,9 +64,9 @@ class Scoreticker:
         for i in range(self.num_games):
             dot_position = ((self.spacing * i) - 1) + 1
             if i == self.index:
-                self.matrix.SetPixel((align + dot_position), 30, 255, 50, 50)
+                self.matrix.set_pixel(((align + dot_position), 30), (255, 255, 255))
             else:
-                self.matrix.SetPixel((align + dot_position), 30, 70, 70, 70)
+                self.matrix.set_pixel(((align + dot_position), 30), (40, 40, 40))
 
     def reset(self):
         self.index = 0
