@@ -270,7 +270,7 @@ class MainRenderer:
 
         debug.info('SCOOOOOOOORE, MAY DAY, MAY DAY, MAY DAY, MAY DAAAAAAAAY - Rick Jeanneret')
         # Load the gif file
-        im = Image.open("Assets/goal_light_animation.gif")
+        im = Image.open("assets/goal_light_animation.gif")
         # Set the frame index to 0
         frameNo = 0
 

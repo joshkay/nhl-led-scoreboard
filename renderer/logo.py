@@ -13,7 +13,7 @@ class LogoRenderer:
     self.load(team)
 
   def load(self, team):
-    filename = 'Assets/logos/{}/{}.png'.format(team.id, logo_name)
+    filename = 'assets/logos/{}/{}.png'.format(team.id, logo_name)
 
     try:
       self.logo = Image.open(filename)
