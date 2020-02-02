@@ -66,7 +66,7 @@ class Scoreticker:
             if i == self.index:
                 self.matrix.set_pixel(((align + dot_position), 30), (255, 255, 255))
             else:
-                self.matrix.set_pixel(((align + dot_position), 30), (40, 40, 40))
+                self.matrix.set_pixel(((align + dot_position), 30), (70, 70, 70))
 
     def reset(self):
         self.index = 0

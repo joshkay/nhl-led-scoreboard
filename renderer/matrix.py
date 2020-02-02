@@ -33,7 +33,6 @@ class Matrix:
     self.image.paste(image, (x, y), image)
 
   def set_pixel(self, position, color):
-    self.pixels = self.image.load()
     self.pixels[position] = color
 
   def render(self):
