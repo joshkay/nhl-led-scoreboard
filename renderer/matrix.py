@@ -33,17 +33,19 @@ class Matrix:
       x += (self.get_width() / 2) - (width / 2)
 
     if (multiline):
-      self.draw.multiline_text((x, y), text, fill=fill, font=font, align=align)
+      self.draw.multiline_text((round(x), round(y)), text, fill=fill, font=font, align=align)
     else:
-      self.draw.text((x, y), text, fill=fill, font=font)
+      self.draw.text((round(x), round(y)), text, fill=fill, font=font)
 
   def draw_image(self, position, image, location="left"):
     x, y = position
 
     if (location == "right"):
       x += self.get_width() - image.size[0]
+    elif (location == "center"):
+      x += (self.get_width() / 2) - (image.size[0] / 2)
 
-    self.image.paste(image, (x, y), image)
+    self.image.paste(image, (round(x), round(y)), image)
 
   def set_pixel(self, position, color):
     self.pixels[position] = color

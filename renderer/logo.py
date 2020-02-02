@@ -36,9 +36,10 @@ class LogoRenderer:
     self.logo.save(filename)
 
   def render(self):
+    x = 0
     if self.location == 'right':
       x = self.logo.width - 21
-    else:
+    elif self.location == 'left':
       x = 21 - self.logo.width
 
     self.matrix.draw_image((x, 0), self.logo, self.location)
