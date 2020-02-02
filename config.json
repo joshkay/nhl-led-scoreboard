@@ -22,7 +22,7 @@
 			"scoreticker"
 		],
 		"scoreticker": {
-			"preferred_teams_only": true,
+			"preferred_teams_only": false,
 			"rotation_rate": 5
 		},
 		"standings": {
