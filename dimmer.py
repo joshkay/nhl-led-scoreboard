@@ -12,7 +12,7 @@ class Dimmer(object):
         self._observer.lat = '49.88147'
         self._observer.lon = '-97.30459'
 
-        self.brightness = 100
+        self.brightness = 1
         self.sleepEvent = sleepEvent
 
         self.update()

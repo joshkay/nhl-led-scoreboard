@@ -1,5 +1,5 @@
 from datetime import datetime, timedelta
-import nhl_api_parser as nhlparser
+import data.nhl_api_parser as nhlparser
 import debug
 
 class Data:

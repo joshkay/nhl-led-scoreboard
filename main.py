@@ -20,7 +20,6 @@ from apscheduler.schedulers.background import BackgroundScheduler
 # Pause the program until a remote debugger is attached
 #ptvsd.wait_for_attach()
 
-
 SCRIPT_NAME = "NHL Scoreboard"
 SCRIPT_VERSION = "0.1.4"
 
