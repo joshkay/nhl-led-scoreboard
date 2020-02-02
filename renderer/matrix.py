@@ -18,11 +18,24 @@ class Matrix:
     self.brightness = brightness
     self.matrix.brightness = self.brightness
 
-  def draw_text(self, position, text, font, fill=None, align="left", multiline=False):
+  def draw_text(self, position, text, font, fill=None, 
+                align="left", multiline=False, location="left"):
+    x, y = position
+
     if (multiline):
-      self.draw.multiline_text(position, text, fill=fill, font=font, align=align)
+      width = self.draw.multiline_textsize(text, font)[0]
     else:
-      self.draw.text(position, text, fill=fill, font=font)
+      width = self.draw.textsize(text, font)[0]
+
+    if (location == "right"):
+      x += self.get_width() - width
+    elif (location == "center"):
+      x += (self.get_width() / 2) - (width / 2)
+
+    if (multiline):
+      self.draw.multiline_text((x, y), text, fill=fill, font=font, align=align)
+    else:
+      self.draw.text((x, y), text, fill=fill, font=font)
 
   def draw_image(self, position, image, location="left"):
     x, y = position
