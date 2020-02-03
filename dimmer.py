@@ -1,6 +1,7 @@
 import ephem
 #import logging
 import debug
+import geocoder
 
 
 class Dimmer(object):
@@ -8,16 +9,18 @@ class Dimmer(object):
         self._observer = ephem.Observer()
         self._observer.pressure = 0
         self._observer.horizon = '-6'
-        # You can get your IP by running: curl https://ipinfo.io/loc or use https://latlon.net (this will get you more specific coordinates)
-        self._observer.lat = '49.88147'
-        self._observer.lon = '-97.30459'
 
-        self.brightness = 100
+        g = geocoder.ip('me')
+        debug.info("Location is: " + str(g.latlng))
+        self._observer.lat = g.lat
+        self._observer.lon = g.lng
+
+        self.brightness = 1
         self.sleepEvent = sleepEvent
 
         self.update()
 
-        # Run every 5 minutes
+        # Run every 10 minutes
         scheduler.add_job(self.update, 'cron', minute='*/10')
 
     def update(self):
