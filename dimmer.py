@@ -12,10 +12,8 @@ class Dimmer(object):
         # Use geocoder library to get lat/lon
         g = geocoder.ip('me')
         debug.info("location is: " + str(g.latlng))
-        self._observer.lat = g.lat
-        self._observer.lon = g.lng
-        #self._observer.lat = '49.88147'
-        #self._observer.lon = '-97.30459'
+        self._observer.lat = str(g.lat)
+        self._observer.lon = str(g.lng)
 
         self.brightness = 1
         self.matrix = matrix
