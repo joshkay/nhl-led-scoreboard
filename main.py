@@ -49,7 +49,7 @@ def run():
   #sleepEvent = threading.Event()
 
   # Dimmer routine to automatically dim display
-  dimmer = Dimmer(matrix)
+  dimmer = Dimmer(data,matrix)
 
   dimmerThread = threading.Thread(target=dimmer.run, args=())
   dimmerThread.daemon = True
