@@ -1,5 +1,5 @@
 from flask import Flask, request, send_from_directory, Blueprint
-from flask_restful import Resource, Api
+from flask_restful import Api
 from flask_cors import CORS
 from json import dumps
 from api.ip import get_ip
@@ -7,42 +7,12 @@ from gevent.pywsgi import WSGIServer
 import logging
 import debug
 import os
-
-class Team(Resource):
-  def __init__(self, **kwargs):
-    self.data = kwargs['data']
-    self.matrix = kwargs['matrix']
-
-  def get(self):
-    return { 'current_team_id': self.data.get_current_team_id() }
-
-  def put(self, id):
-    print(id)
-    self.data.set_current_team_id(id)
-    self.matrix.render()
-    return { 'current_team_id': self.data.get_current_team_id() }
-
-class Brightness(Resource):
-  def __init__(self, **kwargs):
-    self.dimmer = kwargs['dimmer']
-    self.matrix = kwargs['matrix']
-
-  def get(self):
-    return { 'current_brightness': self.dimmer.brightness }
-
-  def put(self, brightness):
-    if brightness < 0:
-      brightness = 0
-    if brightness > 100:
-      brightness = 100
-
-    self.dimmer.brightness = brightness
-    self.matrix.set_brightness(brightness)
-    self.matrix.render()
-    return { 'current_brightness': self.dimmer.brightness }
+from api.resources.brightness import Brightness
+from api.resources.team import Team
+from api.resources.config import Config
 
 class ScoreboardApi:
-  def __init__(self, data, dimmer, matrix):
+  def __init__(self, data, dimmer, matrix, config):
     self.app = Flask(__name__, static_folder='../client/build')
     CORS(self.app)
 
@@ -60,19 +30,29 @@ class ScoreboardApi:
     self.app.logger.disabled = False
 
     self.api = Api(self.app)
+    self.load_resources(data, dimmer, matrix, config)
 
+  def load_resources(self, data, dimmer, matrix, config):
     root_bp = Blueprint('api', __name__)
     api_root_bp = Api(root_bp)
 
-    api_root_bp.add_resource(Team, '/team', '/team/<int:id>', resource_class_kwargs={
-      'data': data,
-      'matrix': matrix
-    })
+    api_root_bp.add_resource(Team, 
+      '/team', 
+      '/team/<int:id>', 
+      resource_class_args={data, matrix}
+    )
 
-    api_root_bp.add_resource(Brightness, '/brightness', '/brightness/<int:brightness>', resource_class_kwargs={
-      'dimmer': dimmer,
-      'matrix': matrix
-    })
+    api_root_bp.add_resource(Brightness, 
+      '/brightness', 
+      '/brightness/<int:brightness>',
+      resource_class_args={dimmer, matrix}
+    )
+
+    api_root_bp.add_resource(Config, 
+      '/config',
+      '/config', 
+      resource_class_args={config}
+    )
 
     self.app.register_blueprint(root_bp, url_prefix='/api')
 

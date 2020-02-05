@@ -11,6 +11,7 @@ import threading
 import sys
 from dimmer import Dimmer
 from renderer.matrix import Matrix
+from config.main import Config
 
 #For remote debugging only
 #import ptvsd
@@ -39,14 +40,12 @@ def run():
   debug.info("{} - v{} ({}x{})".format(SCRIPT_NAME, SCRIPT_VERSION, matrix.get_width(), matrix.get_height()))
 
   # Read scoreboard options from config.json if it exists
-  config = ScoreboardConfig("config", commandArgs, matrix.get_width(), matrix.get_height())
-  debug.set_debug_status(config)
+  scoreboard_config = ScoreboardConfig("config", commandArgs, matrix.get_width(), matrix.get_height())
+  debug.set_debug_status(scoreboard_config)
 
-  data = Data(config)
+  data = Data(scoreboard_config)
 
-  # Event used to sleep when rendering
-  # Allows API to cancel the sleep
-  #sleepEvent = threading.Event()
+  config = Config()
 
   # Dimmer routine to automatically dim display
   dimmer = Dimmer(matrix)
@@ -56,13 +55,12 @@ def run():
   dimmerThread.start()
   
   # Initialize API and run on separate thread
-  api = ScoreboardApi(data, dimmer, matrix)
-  
+  api = ScoreboardApi(data, dimmer, matrix, config)
+
   apiThread = threading.Thread(target=api.run, args=())
   apiThread.daemon = True
   apiThread.start()
 
-  #MainRenderer(matrix, data, dimmer, sleepEvent).render()
   MainRenderer(matrix, data).render()
 
 try:
